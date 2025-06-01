@@ -23,10 +23,37 @@ function UserContext({children}) {
     }
   }
 
+  const getGeminiResponse = async(command) => {
+    try {
+      const result = await axios.post(`${serverUrl}/api/user/asktoassistant`,
+        {command}, 
+        {
+          withCredentials: true,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      
+      if (!result.data) {
+        throw new Error('Empty response from server');
+      }
+      return result.data;
+      
+    } catch (error) {
+      console.error("Gemini response error:", error?.response?.data || error.message);
+      return {
+        type: 'error',
+        userInput: command,
+        response: error?.response?.data?.response || 'Sorry, I had trouble processing that request.'
+      };
+    }
+  }
+
   useEffect(() => {
     handleCurrentUser()
   }, [])
-  const value = {serverUrl, userData, setUserData, frontendImage, setFrontendImage, backendImage, setBackendImage, selectedImage, setSelectedImage}
+  const value = {serverUrl, userData, setUserData, frontendImage, setFrontendImage, backendImage, setBackendImage, selectedImage, setSelectedImage, getGeminiResponse}
   return (
     <div>
       <userDataContext.Provider value={value}>

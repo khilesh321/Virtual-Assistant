@@ -1,4 +1,4 @@
-import React, { useContext, useRef } from 'react'
+import React, { useContext, useRef, useState } from 'react'
 import Card from '../components/Card'
 import image1 from '../assets/image1.png'
 import image2 from '../assets/image2.jpg'
@@ -8,7 +8,7 @@ import image5 from '../assets/image5.png'
 import image6 from '../assets/image6.jpeg'
 import image7 from '../assets/image7.jpeg'
 import { LuImagePlus } from "react-icons/lu";
-import { userDataContext } from '../assets/context/userContext'
+import { userDataContext } from '../context/userContext'
 import { useNavigate } from 'react-router-dom'
 import { IoArrowBackCircleOutline } from "react-icons/io5";
 
@@ -16,6 +16,7 @@ function Customize() {
   const {frontendImage, setFrontendImage, selectedImage, setSelectedImage} = useContext(userDataContext)
   const inputImage = useRef();
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
   const handleImage = e => {
     const file = e.target.files[0];
@@ -23,6 +24,14 @@ function Customize() {
       setFrontendImage(URL.createObjectURL(file));
     }
   } 
+
+  const handleNext = () => {
+    setLoading(true);
+    // Add small delay to show loading state
+    setTimeout(() => {
+      navigate('/customize2');
+    }, 500);
+  };
 
   return (
     <div className='w-full h-[100vh] flex justify-center items-center flex-col p-[20px] bg-gradient-to-t from-black to-[#030353] relative'>
@@ -62,7 +71,20 @@ function Customize() {
           onChange={handleImage}
         />
       </div>
-      <button className={`min-w-[150px] h-[60px] py-1.5 bg-white rounded-full font-semibold text-lg mt-[30px] disabled:opacity-50 cursor-pointer transition-opacity duration-500 ${selectedImage ? 'opacity-100' : 'opacity-0'}`} onClick={() => navigate('/customize2')}>Next</button>
+      <button 
+        className={`min-w-[150px] h-[60px] py-1.5 bg-white rounded-full font-semibold text-lg mt-[30px] disabled:opacity-50 cursor-pointer transition-all duration-300  hover:bg-blue-500 hover:text-white active:scale-95`} 
+        onClick={handleNext}
+        disabled={!selectedImage || loading}
+      >
+        {loading ? (
+          <div className="flex items-center justify-center gap-2">
+            <div className="w-5 h-5 border-2 border-gray-600 border-t-transparent rounded-full animate-spin"></div>
+            <span>Processing...</span>
+          </div>
+        ) : (
+          "Next"
+        )}
+      </button>
     </div>
   )
 }
