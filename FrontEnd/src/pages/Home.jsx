@@ -42,16 +42,16 @@ function Home() {
   }, [])
 
   // 2. Logout handler
-  const handleLogout = async () => {
-    try {
-      await axios.get(`${serverUrl}/api/auth/logout`, { withCredentials: true })
-      setUserData(null)
-      navigate('/signin')
-    } catch (error) {
-      setUserData(null)
-      console.error(error)
-    }
-  }
+  // const handleLogout = async () => {
+  //   try {
+  //     await axios.get(`${serverUrl}/api/auth/logout`, { withCredentials: true })
+  //     setUserData(null)
+  //     navigate('/signin')
+  //   } catch (error) {
+  //     setUserData(null)
+  //     console.error(error)
+  //   }
+  // }
 
   // 3. General function to stop recognition
   const stopRecognition = () => {
