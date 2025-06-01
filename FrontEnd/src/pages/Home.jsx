@@ -142,7 +142,9 @@ function Home() {
     if (!isSpeakingRef.current && !isRecognizingRef.current) {
       try {
         recognitionRef.current.start()
-      } catch {}
+      } catch(e) {
+        console.log(e);
+      }
     }
   }, [])
 
