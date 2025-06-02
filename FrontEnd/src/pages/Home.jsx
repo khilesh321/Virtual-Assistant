@@ -131,9 +131,24 @@ function Home() {
   const startRecognition = () => {
     if (isRecognizingRef.current || isSpeakingRef.current) return
     try {
-      recognitionRef.current.start()
-    } catch {
-      setTimeout(() => safeRecognition(), 500)
+      if (recognitionRef.current) {
+        recognitionRef.current.stop()
+        setTimeout(() => {
+          try {
+            recognitionRef.current.start()
+          } catch (e) {
+            console.error('Recognition start error:', e)
+            isRecognizingRef.current = false
+            setListening(false)
+            setTimeout(safeRecognition, 500)
+          }
+        }, 100)
+      }
+    } catch (e) {
+      console.error('Recognition error:', e)
+      isRecognizingRef.current = false
+      setListening(false)
+      setTimeout(safeRecognition, 500)
     }
   }
 
@@ -141,9 +156,22 @@ function Home() {
   const safeRecognition = useCallback(() => {
     if (!isSpeakingRef.current && !isRecognizingRef.current) {
       try {
-        recognitionRef.current.start()
+        if (recognitionRef.current) {
+          recognitionRef.current.stop()
+          setTimeout(() => {
+            try {
+              recognitionRef.current.start()
+            } catch (e) {
+              console.error('Safe recognition error:', e)
+              isRecognizingRef.current = false
+              setListening(false)
+            }
+          }, 100)
+        }
       } catch(e) {
-        console.log(e);
+        console.error('Safe recognition error:', e)
+        isRecognizingRef.current = false
+        setListening(false)
       }
     }
   }, [])

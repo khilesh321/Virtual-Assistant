@@ -1,20 +1,26 @@
 # Dependencies
 node_modules/
 
-# Environment variables
-.env
-.env.local
-.env.*.local
-.env.production
-.env.development
+# Environment Variables - Backend
 Backend/.env
+Backend/.env.*
 Backend/.env.local
 Backend/.env.production
 Backend/.env.development
-Frontend/.env
-Frontend/.env.local
-Frontend/.env.production
-Frontend/.env.development
+
+# Environment Variables - Frontend
+FrontEnd/.env
+FrontEnd/.env.*
+FrontEnd/.env.local
+FrontEnd/.env.production
+FrontEnd/.env.development
+
+# Root Environment Variables
+.env
+.env.*
+.env.local
+.env.production
+.env.development
 
 # Build outputs
 dist/
@@ -35,12 +41,11 @@ yarn-error.log*
 debug.log
 
 # Backend specific
-Backend/.env
 Backend/dist/
 Backend/coverage/
+Backend/logs/
 
 # Frontend specific
-Frontend/dist/
-Frontend/.env
-Frontend/.env.local
-Frontend/coverage/
+FrontEnd/dist/
+FrontEnd/coverage/
+FrontEnd/logs/

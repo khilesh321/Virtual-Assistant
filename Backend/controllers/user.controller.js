@@ -1,6 +1,6 @@
 import { response } from "express";
 import uploadOnCloudinary from "../config/cloudinary.js";
-import geminiResponse from "../gemini.js";
+import groqResponse from "../groq.js";
 import User from "../models/user.model.js"; // Add .js extension
 import moment from "moment/moment.js";
 
@@ -51,58 +51,67 @@ export const updateAssistant = async (req, res) => {
 export const askToAssistant = async(req,res) => {
   try {
     const {command} = req.body;
+    if (!command?.trim()) {
+      return res.status(400).json({
+        type: 'error',
+        response: "Please provide a command"
+      });
+    }
+
     const user = await User.findById(req.userId);
-    user.history.push(command)
+    if (!user) {
+      return res.status(404).json({
+        type: 'error',
+        response: "User not found"
+      });
+    }
+
+    // Save command to history
+    user.history.push(command);
     await user.save();
-    
-    console.log('Processing command:', command);
-    
-    const result = await geminiResponse(command, user.assistantName, user.name);
-    console.log('Gemini result:', result);
 
+    // Get response from Groq
+    const result = await groqResponse(command, user.assistantName || 'Assistant', user.name);
+    
     try {
-      // Always try to parse the result, whether it's a string or object
-      const gemResult = typeof result === 'string' ? JSON.parse(result) : result;
-      
-      // Validate the response structure
-      if (!gemResult || !gemResult.type || !gemResult.response) {
-        throw new Error('Invalid response structure');
-      }
+      // Parse response
+      const groqResult = JSON.parse(result);
+      const {type, userInput} = groqResult;
 
-      // Handle specific types
-      switch(gemResult.type) {
+      // Handle different command types
+      switch(type) {
         case 'get_date':
           return res.json({
-            type: gemResult.type,
-            userInput: gemResult.userInput,
+            type,
+            userInput,
             response: `Current date is ${moment().format("YYYY-MM-DD")}`
           });
 
-        case 'get_time' : 
+        case 'get_time':
           return res.json({
             type,
-            userInput: gemResult.userInput,
-            response: `current time is ${moment().format("hh:mm A")}`
+            userInput,
+            response: `Current time is ${moment().format("hh:mm A")}`
           });
 
-        case 'get_day' : 
+        case 'get_day':
           return res.json({
             type,
-            userInput: gemResult.userInput,
-            response: `today is ${moment().format("dddd")}`
+            userInput,
+            response: `Today is ${moment().format("dddd")}`
           });
 
-        case 'get_month' : 
+        case 'get_month':
           return res.json({
             type,
-            userInput: gemResult.userInput,
+            userInput,
             response: `Current month is ${moment().format("MMMM")}`
           });
 
-        case 'get_year' : 
+        case 'get_year':
           return res.json({
             type,
-            userInput: gemResult.userInput,
+            userInput,
             response: `Current year is ${moment().year()}`
           });
 
@@ -114,29 +123,30 @@ export const askToAssistant = async(req,res) => {
         case 'instagram_open':
         case 'facebook_open':
         case 'weather_show':
-          return res.json(gemResult);
-        
+          return res.json(groqResult);
+
         default:
           return res.json({
-            type: 'general',
-            userInput: gemResult.userInput || command,
-            response: gemResult.response || "I'm not sure how to handle that request. Could you try something else?"
+            type: 'unknown',
+            userInput,
+            response: "I'm not sure how to handle that request. Could you please try something else?"
           });
       }
+
     } catch (parseError) {
-      console.error('Response parsing error:', parseError);
+      console.error("Parse error:", parseError);
       return res.status(400).json({
         type: 'error',
         userInput: command,
-        response: "I'm having trouble understanding the response. Please try again."
+        response: "I couldn't understand that response"
       });
     }
   } catch (error) {
-    console.error('Assistant error:', error);
+    console.error("Assistant error:", error);
     return res.status(500).json({
       type: 'error',
-      userInput: command,
-      response: "Sorry, I encountered an error. Please try again in a moment."
+      userInput: command || '',
+      response: "Sorry, something went wrong. Please try again."
     });
   }
 }
