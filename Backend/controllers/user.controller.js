@@ -53,44 +53,29 @@ export const askToAssistant = async(req,res) => {
     const {command} = req.body;
     const user = await User.findById(req.userId);
     user.history.push(command)
-    user.save();
-    const userName = user.name;
-    const assistantName = user.assistantName;
-
-    const result = await geminiResponse(command, assistantName, userName);
+    await user.save();
     
+    console.log('Processing command:', command);
+    
+    const result = await geminiResponse(command, user.assistantName, user.name);
+    console.log('Gemini result:', result);
+
     try {
-      // Find the first occurrence of '{' and last occurrence of '}'
-      const jsonStart = result.indexOf('{');
-      const jsonEnd = result.lastIndexOf('}') + 1;
+      // Always try to parse the result, whether it's a string or object
+      const gemResult = typeof result === 'string' ? JSON.parse(result) : result;
       
-      if (jsonStart === -1 || jsonEnd <= jsonStart) {
-        console.error("Invalid JSON format in response:", result);
-        return res.status(400).json({
-          type: 'error',
-          response: "Sorry, I couldn't understand that response"
-        });
+      // Validate the response structure
+      if (!gemResult || !gemResult.type || !gemResult.response) {
+        throw new Error('Invalid response structure');
       }
 
-      const jsonStr = result.slice(jsonStart, jsonEnd);
-      let gemResult;
-      try {
-        gemResult = JSON.parse(jsonStr);
-      } catch (e) {
-        console.error("JSON parsing failed:", e, "Response string:", jsonStr);
-        return res.status(400).json({
-          type: 'error',
-          response: "Sorry, I couldn't understand that response"
-        });
-      }
-      const {type} = gemResult;
-
-      switch(type){
-        case 'get_date' : 
+      // Handle specific types
+      switch(gemResult.type) {
+        case 'get_date':
           return res.json({
-            type,
+            type: gemResult.type,
             userInput: gemResult.userInput,
-            response: `current date is ${moment().format("YYYY-MM-DD")}`
+            response: `Current date is ${moment().format("YYYY-MM-DD")}`
           });
 
         case 'get_time' : 
@@ -129,32 +114,29 @@ export const askToAssistant = async(req,res) => {
         case 'instagram_open':
         case 'facebook_open':
         case 'weather_show':
-          return res.json({
-            type,
-            userInput: gemResult.userInput,
-            response: gemResult.response
-          });
-          
+          return res.json(gemResult);
+        
         default:
           return res.json({
-            type: 'unknown',
-            userInput: gemResult.userInput,
-            response: "I'm not sure how to handle that request. Could you please try something else?"
+            type: 'general',
+            userInput: gemResult.userInput || command,
+            response: gemResult.response || "I'm not sure how to handle that request. Could you try something else?"
           });
       }
-
     } catch (parseError) {
-      console.error("JSON parsing error:", parseError);
+      console.error('Response parsing error:', parseError);
       return res.status(400).json({
         type: 'error',
-        response: "Sorry, I couldn't understand that response"
+        userInput: command,
+        response: "I'm having trouble understanding the response. Please try again."
       });
     }
   } catch (error) {
-    console.error("Assistant error:", error);
+    console.error('Assistant error:', error);
     return res.status(500).json({
       type: 'error',
-      response: "Sorry, something went wrong. Please try again."
+      userInput: command,
+      response: "Sorry, I encountered an error. Please try again in a moment."
     });
   }
 }

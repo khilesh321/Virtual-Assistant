@@ -44,6 +44,9 @@ Important:
 
 now your userInput- ${command}
 `;
+
+    console.log('Sending request to Gemini with command:', command);
+    
     const result = await axios.post(apiUrl, {
       "contents": [{
           "parts": [{
@@ -52,14 +55,61 @@ now your userInput- ${command}
       }]
     });
 
-    if (!result.data.candidates || !result.data.candidates[0].content.parts[0].text) {
-      throw new Error('Invalid response from Gemini API');
+    console.log('Raw Gemini response:', JSON.stringify(result.data));
+
+    if (!result.data || !result.data.candidates || !result.data.candidates[0].content.parts[0].text) {
+      console.error('Invalid or empty response from Gemini API');
+      return JSON.stringify({
+        type: 'general',
+        userInput: command.replace(new RegExp(assistantName, 'i'), '').trim(),
+        response: "I apologize, but I'm having trouble processing that request right now. Could you try again?"
+      });
     }
 
     const responseText = result.data.candidates[0].content.parts[0].text;
-    return responseText
+    console.log('Gemini response text:', responseText);
+
+    // Validate JSON format
+    try {
+      // Find the JSON object in the response
+      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        throw new Error('No valid JSON found in response');
+      }
+
+      // Parse and validate the JSON
+      const parsedResponse = JSON.parse(jsonMatch[0]);
+      if (!parsedResponse.type || !parsedResponse.response) {
+        throw new Error('Invalid response structure');
+      }
+
+      return jsonMatch[0]; // Return the valid JSON string
+    } catch (jsonError) {
+      console.error('JSON processing error:', jsonError);
+      // Fallback response
+      return JSON.stringify({
+        type: 'general',
+        userInput: command.replace(new RegExp(assistantName, 'i'), '').trim(),
+        response: "I understood your request but had trouble processing it. Could you rephrase that?"
+      });
+    }
+
   } catch (error) {
-    console.error(error);
+    console.error('Gemini API error:', error.response?.data || error.message);
+    // More specific error handling
+    const errorResponse = {
+      type: 'error',
+      userInput: command.replace(new RegExp(assistantName, 'i'), '').trim(),
+      response: "I encountered a technical issue. Please try again in a moment."
+    };
+
+    if (error.response?.status === 429) {
+      errorResponse.response = "I'm receiving too many requests right now. Please try again in a few seconds.";
+    } else if (error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT') {
+      errorResponse.response = "I'm having trouble connecting to my services. Please check your internet connection.";
+    }
+
+    return JSON.stringify(errorResponse);
   }
 }
 
