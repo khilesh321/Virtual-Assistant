@@ -69,7 +69,7 @@ function Customize2() {
           name="name"
           id="signup-name"
           value={assistantName}
-          placeholder='eg. CHETANA...' 
+          placeholder='eg. Jarvis...' 
           required
           onChange={e => setAssistantName(e.target.value)}
         />
