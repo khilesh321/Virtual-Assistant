@@ -41,7 +41,7 @@ function SignUp() {
   }
 
   return (
-    <div className='w-full min-h-screen bg-cover bg-center bg-no-repeat flex justify-center items-center' style={{backgroundImage: `url(${bg})`}}>
+    <div className='w-full h-[100vh] bg-cover flex justify-center items-center' style={{backgroundImage: `url(${bg})`}}>
       <form className='w-[90%] h-[600px] max-w-[500px] px-[20px] bg-[#00000060] backdrop-blur shadow-lg shadow-black flex flex-col justify-center items-center gap-[20px]' onSubmit={handleSignUp}>
         <h1 className='text-white text-[30px] font-semibold mb-[30px]'>Register to the <span className='text-blue-400 font-bold'>Virtual Assistant</span></h1>
         <input 
