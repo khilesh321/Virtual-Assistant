@@ -65,11 +65,24 @@ export const askToAssistant = async(req,res) => {
       const jsonEnd = result.lastIndexOf('}') + 1;
       
       if (jsonStart === -1 || jsonEnd <= jsonStart) {
-        throw new Error('Invalid JSON format in response');
+        console.error("Invalid JSON format in response:", result);
+        return res.status(400).json({
+          type: 'error',
+          response: "Sorry, I couldn't understand that response"
+        });
       }
 
       const jsonStr = result.slice(jsonStart, jsonEnd);
-      const gemResult = JSON.parse(jsonStr);
+      let gemResult;
+      try {
+        gemResult = JSON.parse(jsonStr);
+      } catch (e) {
+        console.error("JSON parsing failed:", e, "Response string:", jsonStr);
+        return res.status(400).json({
+          type: 'error',
+          response: "Sorry, I couldn't understand that response"
+        });
+      }
       const {type} = gemResult;
 
       switch(type){
