@@ -1,23 +1,36 @@
-# Node modules
+# Dependencies
 node_modules/
 
-# Environment files
+# Environment variables
 .env
 .env.local
-.env.production
+.env.*.local
 
-# Logs
+# Build outputs
+dist/
+build/
+out/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Debug logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+debug.log
 
-# OS files
-.DS_Store
-Thumbs.db
+# Backend specific
+Backend/.env
+Backend/dist/
+Backend/coverage/
 
-# Build output
-dist/
-build/
-
-# VSCode settings
-.vscode/
+# Frontend specific
+Frontend/dist/
+Frontend/.env
+Frontend/.env.local
+Frontend/coverage/
