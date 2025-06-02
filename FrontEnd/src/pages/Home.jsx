@@ -288,7 +288,7 @@ function Home() {
   }
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center gap-6 bg-gradient-to-t from-black to-[#030353] relative">
+    <div className="h-[100vh] w-full flex flex-col items-center justify-center gap-6 bg-gradient-to-t from-black to-[#030353] relative">
       {/* Hamburger Menu */}
       <button
         className="md:hidden px-4 py-2 absolute top-5 right-5 text-white z-50"
