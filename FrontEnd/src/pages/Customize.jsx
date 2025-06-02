@@ -8,7 +8,7 @@ import image5 from '../assets/image5.png'
 import image6 from '../assets/image6.jpeg'
 import image7 from '../assets/image7.jpeg'
 import { LuImagePlus } from "react-icons/lu";
-import { userDataContext } from '../context/userContext'
+import { userDataContext } from '../context/UserContext2'
 import { useNavigate } from 'react-router-dom'
 import { IoArrowBackCircleOutline } from "react-icons/io5";
 
