@@ -288,7 +288,7 @@ function Home() {
   }
 
   return (
-    <div className="w-full h-[100vh] flex flex-col items-center justify-center gap-6 bg-gradient-to-t from-black to-[#030353] relative">
+    <div className="min-h-screen w-full flex flex-col items-center justify-center gap-6 bg-gradient-to-t from-black to-[#030353] relative">
       {/* Hamburger Menu */}
       <button
         className="md:hidden px-4 py-2 absolute top-5 right-5 text-white z-50"
@@ -307,15 +307,6 @@ function Home() {
             }}
           >
             Customize
-          </button>
-          <button
-            className="px-4 py-2 text-lg font-semibold hover:bg-yellow-500 hover:text-white rounded-lg transition"
-            onClick={() => {
-              setIsMenuOpen(false)
-              handleStopListening()
-            }}
-          >
-            Stop Listening
           </button>
           <button
             className="px-4 py-2 text-lg font-semibold hover:bg-red-500 hover:text-white rounded-lg transition"
