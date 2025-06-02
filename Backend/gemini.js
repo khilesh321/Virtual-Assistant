@@ -8,15 +8,11 @@ You are not Google. You will now behave like a voice-enabled assistant.
 
 Your task is to understand the user's natural language input and respond with a JSON object like this:
 
-\`\`\`json
 {
 "type": "general" | "google_search" | "youtube_search" | "youtube_play" | "get_time" | "get_date" | "get_day" | "get_month" | "get_year" |"calculator_open" | "instagram_open" | "facebook_open" | "weather_show",
 "userInput": "<original user inputs>" (only remove your name from userinput if exists) and agar kisi ne google ya youtube pe kuch search karne ko bola hai to userinput me only bo search waala text jaye,
 "response": "<a short spoken response to read out loud to the user>"
 }
-\`\`\`
-
-Ensure that the response is always a valid JSON object. If you cannot fulfill the request, respond with a JSON object with type "error" and a suitable error message.
 
 Instructions:
 - "type": determine the intent of the user.
@@ -56,24 +52,14 @@ now your userInput- ${command}
       }]
     });
 
-    if (!result.data || !result.data.candidates || !result.data.candidates[0].content.parts[0].text) {
-      console.error("Gemini API returned an empty response:", result.data);
-      return JSON.stringify({
-        type: 'error',
-        userInput: command,
-        response: "Sorry, I couldn't understand that response"
-      });
+    if (!result.data.candidates || !result.data.candidates[0].content.parts[0].text) {
+      throw new Error('Invalid response from Gemini API');
     }
 
     const responseText = result.data.candidates[0].content.parts[0].text;
     return responseText
   } catch (error) {
     console.error(error);
-    return JSON.stringify({
-      type: 'error',
-      userInput: command,
-      response: "Sorry, I encountered an error processing your request."
-    });
   }
 }
 
