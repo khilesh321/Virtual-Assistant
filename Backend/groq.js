@@ -55,7 +55,7 @@ Process this command: "${command}"`;
           content: prompt
         }
       ],
-      model: "meta-llama/llama-4-scout-17b-16e-instruct",
+      model: "openai/gpt-oss-20b",
       temperature: 0.3,
       max_tokens: 1024,
     });
